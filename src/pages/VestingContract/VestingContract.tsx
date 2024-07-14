@@ -1,5 +1,11 @@
 import { usePromise } from '@/hooks/usePromise/usePromise';
-import { getEarnedToken, getEndTime, getTotalRewardsAmount, getTotalWithdrawn } from '@/services/vesting';
+import {
+  getEarnedToken,
+  getEndTime,
+  getTotalRewardsAmount,
+  getTotalWithdrawn,
+  withdrawRewards,
+} from '@/services/vesting';
 import clsx from 'clsx';
 import React, { useEffect } from 'react';
 import { useAccount } from 'wagmi';
@@ -10,17 +16,27 @@ export default function VestingContract() {
     getEarnedToken,
   );
 
+  const [withdraw, , withdrawing] = usePromise(withdrawRewards);
+
   const [getTotalRewards, totalRewards = 0, gettingTotalRewards] = usePromise<
     string,
     Parameters<typeof getTotalRewardsAmount>
   >(getTotalRewardsAmount);
 
-  const [getWithdraw, totalWithdraw = 0, gettingTotalWithdrawn] = usePromise<
+  const [getWithdrawn, totalWithdraw = 0, gettingTotalWithdrawn] = usePromise<
     string,
     Parameters<typeof getTotalWithdrawn>
   >(getTotalWithdrawn);
 
   const [, endTime, gettingEndTime] = usePromise<string>(getEndTime, { initReq: true });
+
+  const handleWithdraw = () => {
+    withdraw().then(() => {
+      getEarnedTokens('0xf06EBdA210678685F635f56d76417603D98d6D45');
+      getTotalRewards('0xf06EBdA210678685F635f56d76417603D98d6D45');
+      getWithdrawn('0xf06EBdA210678685F635f56d76417603D98d6D45');
+    });
+  };
 
   console.log({ earned, totalRewards, endTime });
 
@@ -28,7 +44,7 @@ export default function VestingContract() {
     if (!address) return;
     getEarnedTokens('0xf06EBdA210678685F635f56d76417603D98d6D45');
     getTotalRewards('0xf06EBdA210678685F635f56d76417603D98d6D45');
-    getWithdraw('0xf06EBdA210678685F635f56d76417603D98d6D45');
+    getWithdrawn('0xf06EBdA210678685F635f56d76417603D98d6D45');
   }, [address]);
 
   return (
@@ -82,11 +98,12 @@ export default function VestingContract() {
           </div>
           <button
             disabled={!earned}
+            onClick={handleWithdraw}
             className={clsx('button bg-[#2976D3] py-3 px-4 rounded-lg hover:opacity-90 text-content-tirtiary mt-5', {
               'bg-gray-400': !earned,
             })}
           >
-            Withdraw All
+            {withdrawing ? 'Withdrawing' : 'Withdraw All'}
           </button>
         </div>
       </div>

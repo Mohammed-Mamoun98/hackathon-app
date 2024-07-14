@@ -1,4 +1,4 @@
-import { contractRead } from '@/utils/contracts';
+import { contractRead, contractWrite } from '@/utils/contracts';
 import { Address, formatEther } from 'viem';
 
 export const getEarnedToken = async (account: Address) => {
@@ -40,3 +40,12 @@ export const getEndTime = async () => {
   });
   return BigInt(res).toString();
 };
+
+export const withdrawRewards = async () =>
+  contractWrite({
+    contractName: 'vesting',
+    functionName: 'withdraw',
+    args: [],
+    chain: 'ROOT',
+    account: '0xf06EBdA210678685F635f56d76417603D98d6D45',
+  });
